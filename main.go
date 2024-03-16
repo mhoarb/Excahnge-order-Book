@@ -32,6 +32,9 @@ func (ob *OrderBook) AddOrder(order Order) {
 			sort.Slice(ob.SellOrders, func(i, j int) bool {
 				return ob.SellOrders[i].Price > ob.SellOrders[j].Price
 			})
+		} else {
+			fmt.Println(order, " its uncorrected order")
+
 		}
 
 	} else {
@@ -94,7 +97,7 @@ func main() {
 	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "S", Price: 1000, Quantity: 50})
 	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "S", Price: 1000, Quantity: 50})
 	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "S", Price: 1000, Quantity: 50})
-	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "B", Price: 1000, Quantity: 50})
+	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "falseOeder", Price: 1000, Quantity: 50})
 	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "S", Price: 1000, Quantity: 50})
 
 	orderBook.MatchOrders()
