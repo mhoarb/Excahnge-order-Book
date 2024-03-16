@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"sort"
 )
 
@@ -11,7 +12,7 @@ type OrderBook struct {
 }
 
 type Order struct {
-	OrderID   int
+	OrderID   uuid.UUID
 	BuyOrSell string
 	Price     float64
 	Quantity  int32
@@ -45,13 +46,13 @@ func (ob *OrderBook) RemoveOrder(order Order) {
 			if o.Price == order.Price && o.Quantity == order.Quantity {
 				ob.BuyOrders = append(ob.BuyOrders[:i], ob.BuyOrders[i+1:]...)
 
+				break
 			}
-
 		}
 	} else if order.BuyOrSell == "S" {
 		for i, o := range ob.SellOrders {
 			if o.Price == order.Price && o.Quantity == order.Quantity {
-				ob.SellOrders = append(ob.SellOrders[:i], ob.BuyOrders[i+1:]...)
+				ob.SellOrders = append(ob.SellOrders[:i], ob.SellOrders[i+1:]...)
 				break
 			}
 		}
@@ -63,10 +64,19 @@ func (ob *OrderBook) MatchOrders() {
 	for len(ob.BuyOrders) > 0 && len(ob.SellOrders) > 0 {
 		buyOrder := ob.BuyOrders[0]
 		sellOrder := ob.SellOrders[0]
-		if buyOrder.Price >= sellOrder.Price {
+		if buyOrder.Price == sellOrder.Price {
+
 			ob.RemoveOrder(buyOrder)
 			ob.RemoveOrder(sellOrder)
-			fmt.Printf("Matched order , delete this buyOrder(%v) & this sellOrder(%v)", buyOrder, sellOrder)
+			if buyOrder.Quantity > sellOrder.Quantity {
+				remainOrder := Order{OrderID: uuid.New(),
+					BuyOrSell: "B",
+					Price:     buyOrder.Price,
+					Quantity:  buyOrder.Quantity - sellOrder.Quantity}
+				ob.AddOrder(remainOrder)
+
+			}
+			fmt.Printf("Matched order , delete this buyOrder(%v) & this sellOrder(%v)\n", buyOrder, sellOrder)
 		} else {
 			break
 		}
@@ -76,10 +86,19 @@ func (ob *OrderBook) MatchOrders() {
 }
 
 func main() {
+
 	orderBook := OrderBook{}
-	orderBook.AddOrder(Order{OrderID: 10000, BuyOrSell: "B", Price: 10, Quantity: 100})
-	orderBook.AddOrder(Order{OrderID: 10000, BuyOrSell: "B", Price: 9, Quantity: 50})
-	orderBook.AddOrder(Order{OrderID: 10000, BuyOrSell: "B", Price: 11, Quantity: 200})
-	orderBook.AddOrder(Order{OrderID: 10000, BuyOrSell: "B", Price: 10, Quantity: 50})
+	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "B", Price: 1000, Quantity: 100})
+	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "S", Price: 1000, Quantity: 50})
+	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "S", Price: 1000, Quantity: 50})
+	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "S", Price: 1000, Quantity: 50})
+	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "S", Price: 1000, Quantity: 50})
+	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "S", Price: 1000, Quantity: 50})
+	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "B", Price: 1000, Quantity: 50})
+	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "S", Price: 1000, Quantity: 50})
+
+	orderBook.MatchOrders()
+
+	fmt.Printf("%v\n%v\n", orderBook.BuyOrders, orderBook.SellOrders)
 
 }
