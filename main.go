@@ -11,28 +11,28 @@ type OrderBook struct {
 }
 
 type Order struct {
-	IsBuy    bool //if they wish Buy or sell
-	Price    float64
-	Quantity int32 //the number of shares
+	OrderID   int
+	BuyOrSell string
+	Price     float64
+	Quantity  int32
 }
 
 func (ob *OrderBook) AddOrder(order Order) {
 	if order.Price < 999_999 && order.Quantity < 999_999_999 {
-		if order.IsBuy {
+		if order.BuyOrSell == "B" {
 			ob.BuyOrders = append(ob.BuyOrders, order)
 
 			sort.Slice(ob.BuyOrders, func(i, j int) bool {
 				return ob.BuyOrders[i].Price < ob.BuyOrders[j].Price
 			})
 
-		} else {
+		} else if order.BuyOrSell == "S" {
 			ob.SellOrders = append(ob.SellOrders, order)
 			sort.Slice(ob.SellOrders, func(i, j int) bool {
 				return ob.SellOrders[i].Price > ob.SellOrders[j].Price
 			})
 		}
-		fmt.Println(ob)
-		// fmt.Printf("OrderBook(BUY) :%v\n ,OrderBook(SELL) : %v " , ob.BuyOrders , ob.SellOrders)
+
 	} else {
 		fmt.Println("uncorrected order")
 
@@ -40,7 +40,7 @@ func (ob *OrderBook) AddOrder(order Order) {
 }
 
 func (ob *OrderBook) RemoveOrder(order Order) {
-	if order.IsBuy {
+	if order.BuyOrSell == "B" {
 		for i, o := range ob.BuyOrders {
 			if o.Price == order.Price && o.Quantity == order.Quantity {
 				ob.BuyOrders = append(ob.BuyOrders[:i], ob.BuyOrders[i+1:]...)
@@ -48,7 +48,7 @@ func (ob *OrderBook) RemoveOrder(order Order) {
 			}
 
 		}
-	} else {
+	} else if order.BuyOrSell == "S" {
 		for i, o := range ob.SellOrders {
 			if o.Price == order.Price && o.Quantity == order.Quantity {
 				ob.SellOrders = append(ob.SellOrders[:i], ob.BuyOrders[i+1:]...)
@@ -77,9 +77,9 @@ func (ob *OrderBook) MatchOrders() {
 
 func main() {
 	orderBook := OrderBook{}
-	orderBook.AddOrder(Order{Price: 10, Quantity: 100, IsBuy: true})
-	orderBook.AddOrder(Order{Price: 9, Quantity: 50, IsBuy: true})
-	orderBook.AddOrder(Order{Price: 11, Quantity: 200, IsBuy: true})
-	orderBook.AddOrder(Order{Price: 10, Quantity: 50, IsBuy: false})
+	orderBook.AddOrder(Order{OrderID: 10000, BuyOrSell: "B", Price: 10, Quantity: 100})
+	orderBook.AddOrder(Order{OrderID: 10000, BuyOrSell: "B", Price: 9, Quantity: 50})
+	orderBook.AddOrder(Order{OrderID: 10000, BuyOrSell: "B", Price: 11, Quantity: 200})
+	orderBook.AddOrder(Order{OrderID: 10000, BuyOrSell: "B", Price: 10, Quantity: 50})
 
 }
