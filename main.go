@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
+	"log"
 	"os"
 	"sort"
 	"strconv"
@@ -114,25 +115,41 @@ func main() {
 
 	for {
 		var order Order
+		fmt.Println("please enter your order in this format 'BuyOrSell,Price,Quantity'")
+		orderInput, _ := reader.ReadString('\n')
+		orderParts := strings.Split(strings.TrimSpace(orderInput), ",")
+		if len(orderParts) != 3 {
+			fmt.Println("your order is not valid  please try again")
+			continue
+		}
 		orderId, _ := uuid.NewRandom()
 		order.OrderID = orderId
 
-		fmt.Println("enter B or S")
-		buyOrSell, _ := reader.ReadString('\n')
-		order.BuyOrSell = strings.TrimSpace(buyOrSell)
+		order.BuyOrSell = orderParts[0]
 
-		fmt.Println("price")
-		priceStr, _ := reader.ReadString('\n')
-		price, _ := strconv.ParseFloat(strings.TrimSpace(priceStr), 64)
+		price, err := strconv.ParseFloat(orderParts[1], 64)
+		if err != nil {
+			log.Fatal(err)
+			continue
+		}
 		order.Price = price
-
-		fmt.Println("quentity")
-		quantityStr, _ := reader.ReadString('\n')
-		quantity, _ := strconv.Atoi(strings.TrimSpace(quantityStr))
+		quantity, err := strconv.Atoi(orderParts[2])
+		if err != nil {
+			log.Fatal(err)
+			continue
+		}
 		order.Quantity = int32(quantity)
+
 		orderBook.AddOrder(order)
 		orderBook.MatchOrders()
 		fmt.Println(orderBook)
+		fmt.Println("Do you want to add another order?  (yes/no)")
+		choiceInput, _ := reader.ReadString('\n')
+		choice := strings.TrimSpace(choiceInput)
+
+		if choice != "yes" {
+			break
+		}
 	}
 
 }
