@@ -108,8 +108,7 @@ func prettyPrint(i interface{}) string {
 	return string(s)
 }
 
-func main() {
-
+func InputFromUser() {
 	reader := bufio.NewReader(os.Stdin)
 	var orderBook OrderBook
 
@@ -154,7 +153,7 @@ func main() {
 				fmt.Println("do you want to print all and pretty the orderBook?(y/n")
 				PrintOrderChoiceInput, _ := reader.ReadString('\n')
 				PrintOrderChoice := strings.TrimSpace(PrintOrderChoiceInput)
-				if PrintOrderChoice == "yes" {
+				if PrintOrderChoice == "y" {
 					prettyPrint(orderBook)
 					break
 				}
@@ -163,4 +162,8 @@ func main() {
 		}
 
 	}
+}
+
+func main() {
+	InputFromUser()
 }
