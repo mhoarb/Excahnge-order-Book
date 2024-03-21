@@ -115,7 +115,7 @@ func main() {
 
 	for {
 		var order Order
-		fmt.Println("please enter your order in this format 'BuyOrSell,Price,Quantity'")
+		fmt.Println("please enter your order in this format (B/S,Price,Quantity)")
 		orderInput, _ := reader.ReadString('\n')
 		orderParts := strings.Split(strings.TrimSpace(orderInput), ",")
 		if len(orderParts) != 3 {
@@ -130,26 +130,37 @@ func main() {
 		price, err := strconv.ParseFloat(orderParts[1], 64)
 		if err != nil {
 			log.Fatal(err)
-			continue
+
 		}
 		order.Price = price
 		quantity, err := strconv.Atoi(orderParts[2])
 		if err != nil {
 			log.Fatal(err)
-			continue
+
 		}
 		order.Quantity = int32(quantity)
 
 		orderBook.AddOrder(order)
 		orderBook.MatchOrders()
 		fmt.Println(orderBook)
-		fmt.Println("Do you want to add another order?  (yes/no)")
-		choiceInput, _ := reader.ReadString('\n')
-		choice := strings.TrimSpace(choiceInput)
+		{
+			fmt.Println("Do you want to add another order?  (y/n)")
+			choiceInput, _ := reader.ReadString('\n')
+			choice := strings.TrimSpace(choiceInput)
 
-		if choice != "yes" {
-			break
+			if choice == "y" {
+				continue
+			} else if choice == "n" {
+				fmt.Println("do you want to print all and pretty the orderBook?(y/n")
+				PrintOrderChoiceInput, _ := reader.ReadString('\n')
+				PrintOrderChoice := strings.TrimSpace(PrintOrderChoiceInput)
+				if PrintOrderChoice == "yes" {
+					prettyPrint(orderBook)
+					break
+				}
+				break
+			}
 		}
-	}
 
+	}
 }
