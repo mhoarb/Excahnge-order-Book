@@ -1,9 +1,15 @@
 package main
 
 import (
+	"bufio"
+	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
+	"log"
+	"os"
 	"sort"
+	"strconv"
+	"strings"
 )
 
 type OrderBook struct {
@@ -88,20 +94,46 @@ func (ob *OrderBook) MatchOrders() {
 
 }
 
+func prettyPrint(i interface{}) string {
+	s, _ := json.MarshalIndent(i, "", "\t")
+	fmt.Println(string(s))
+	return string(s)
+}
+
 func main() {
 
+	reader := bufio.NewReader(os.Stdin)
+	buyOrSell, _ := reader.ReadString(',')
+
+	Price, _ := reader.ReadString(',')
+
+	floatPrice, err := strconv.ParseFloat(strings.TrimSpace(Price), 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	quantity, _ := reader.ReadString(',')
+	QInt32, err := strconv.ParseInt(strings.TrimSpace(quantity), 10, 32)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	orderBook := OrderBook{}
+	for i := 0; i < 1; i++ {
+
+		orderBook.AddOrder(Order{
+			OrderID:   uuid.New(),
+			BuyOrSell: buyOrSell,
+			Price:     floatPrice,
+			Quantity:  int32(QInt32),
+		})
+
+		orderBook.MatchOrders()
+		//prettyPrint(orderBook)
+
+	}
+
 	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "B", Price: 1000, Quantity: 100})
-	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "S", Price: 1000, Quantity: 50})
-	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "S", Price: 1000, Quantity: 50})
-	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "S", Price: 1000, Quantity: 50})
-	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "S", Price: 1000, Quantity: 50})
-	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "S", Price: 1000, Quantity: 50})
-	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "falseOeder", Price: 1000, Quantity: 50})
-	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "S", Price: 1000, Quantity: 50})
-
-	orderBook.MatchOrders()
-
-	fmt.Printf("%v\n%v\n", orderBook.BuyOrders, orderBook.SellOrders)
+	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "S", Price: 1200, Quantity: 100})
 
 }
