@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
-	"log"
 	"os"
 	"sort"
 	"strconv"
@@ -84,8 +83,16 @@ func (ob *OrderBook) MatchOrders() {
 					Quantity:  buyOrder.Quantity - sellOrder.Quantity}
 				ob.AddOrder(remainOrder)
 
+			} else if sellOrder.Quantity > buyOrder.Quantity {
+				remainOrder := Order{OrderID: uuid.New(),
+					BuyOrSell: "S",
+					Price:     sellOrder.Price,
+					Quantity:  sellOrder.Quantity - buyOrder.Quantity}
+				ob.AddOrder(remainOrder)
+
 			}
 			fmt.Printf("Matched order , delete this buyOrder(%v) & this sellOrder(%v)\n", buyOrder, sellOrder)
+
 		} else {
 			break
 		}
@@ -103,37 +110,29 @@ func prettyPrint(i interface{}) string {
 func main() {
 
 	reader := bufio.NewReader(os.Stdin)
-	buyOrSell, _ := reader.ReadString(',')
+	var orderBook OrderBook
 
-	Price, _ := reader.ReadString(',')
+	for {
+		var order Order
+		orderId, _ := uuid.NewRandom()
+		order.OrderID = orderId
 
-	floatPrice, err := strconv.ParseFloat(strings.TrimSpace(Price), 64)
-	if err != nil {
-		log.Fatal(err)
-	}
+		fmt.Println("enter B or S")
+		buyOrSell, _ := reader.ReadString('\n')
+		order.BuyOrSell = strings.TrimSpace(buyOrSell)
 
-	quantity, _ := reader.ReadString(',')
-	QInt32, err := strconv.ParseInt(strings.TrimSpace(quantity), 10, 32)
-	if err != nil {
-		log.Fatal(err)
-	}
+		fmt.Println("price")
+		priceStr, _ := reader.ReadString('\n')
+		price, _ := strconv.ParseFloat(strings.TrimSpace(priceStr), 64)
+		order.Price = price
 
-	orderBook := OrderBook{}
-	for i := 0; i < 1; i++ {
-
-		orderBook.AddOrder(Order{
-			OrderID:   uuid.New(),
-			BuyOrSell: buyOrSell,
-			Price:     floatPrice,
-			Quantity:  int32(QInt32),
-		})
-
+		fmt.Println("quentity")
+		quantityStr, _ := reader.ReadString('\n')
+		quantity, _ := strconv.Atoi(strings.TrimSpace(quantityStr))
+		order.Quantity = int32(quantity)
+		orderBook.AddOrder(order)
 		orderBook.MatchOrders()
-		//prettyPrint(orderBook)
-
+		fmt.Println(orderBook)
 	}
-
-	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "B", Price: 1000, Quantity: 100})
-	orderBook.AddOrder(Order{OrderID: uuid.New(), BuyOrSell: "S", Price: 1200, Quantity: 100})
 
 }
