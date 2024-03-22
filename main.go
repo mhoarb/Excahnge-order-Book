@@ -104,7 +104,7 @@ func (ob *OrderBook) MatchOrders() {
 
 }
 
-func prettyPrint(i interface{}) string {
+func JsonPrint(i interface{}) string {
 	s, _ := json.MarshalIndent(i, "", "\t")
 	fmt.Println(string(s))
 	return string(s)
@@ -117,6 +117,31 @@ func Md5Hash(order OrderBook) {
 	hash := hashes.Sum(nil)
 	hashHex := hex.EncodeToString(hash)
 	fmt.Println(hashHex)
+}
+
+func (o Order) String() string {
+	return fmt.Sprintf("%s,%.2f,%d", o.BuyOrSell, o.Price, o.Quantity)
+}
+
+func (ob OrderBook) String() string {
+	var result strings.Builder
+	maxOrders := len(ob.BuyOrders)
+	if len(ob.SellOrders) > maxOrders {
+		maxOrders = len(ob.SellOrders)
+	}
+
+	for i := 0; i < maxOrders; i++ {
+		if i < len(ob.BuyOrders) {
+			result.WriteString(ob.BuyOrders[i].String())
+		}
+		result.WriteString(" | ")
+		if i < len(ob.SellOrders) {
+			result.WriteString(ob.SellOrders[i].String())
+		}
+		result.WriteString("\n")
+	}
+	return result.String()
+
 }
 
 func InputFromUser() {
@@ -152,7 +177,7 @@ func InputFromUser() {
 
 		orderBook.AddOrder(order)
 		orderBook.MatchOrders()
-		fmt.Println(orderBook)
+
 		{
 			fmt.Println("Do you want to add another order?  (y/n)")
 			choiceInput, _ := reader.ReadString('\n')
@@ -165,7 +190,8 @@ func InputFromUser() {
 				PrintOrderChoiceInput, _ := reader.ReadString('\n')
 				PrintOrderChoice := strings.TrimSpace(PrintOrderChoiceInput)
 				if PrintOrderChoice == "y" {
-					prettyPrint(orderBook)
+					JsonPrint(orderBook)
+					fmt.Println(orderBook)
 					Md5Hash(orderBook)
 					break
 				}
