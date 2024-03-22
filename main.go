@@ -2,6 +2,8 @@ package main
 
 import (
 	"bufio"
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
@@ -108,6 +110,15 @@ func prettyPrint(i interface{}) string {
 	return string(s)
 }
 
+func Md5Hash(order OrderBook) {
+	hashes := md5.New()
+	orderByte := []byte(fmt.Sprintf("%+v", order))
+	hashes.Write(orderByte)
+	hash := hashes.Sum(nil)
+	hashHex := hex.EncodeToString(hash)
+	fmt.Println(hashHex)
+}
+
 func InputFromUser() {
 	reader := bufio.NewReader(os.Stdin)
 	var orderBook OrderBook
@@ -155,6 +166,7 @@ func InputFromUser() {
 				PrintOrderChoice := strings.TrimSpace(PrintOrderChoiceInput)
 				if PrintOrderChoice == "y" {
 					prettyPrint(orderBook)
+					Md5Hash(orderBook)
 					break
 				}
 				break
@@ -166,4 +178,5 @@ func InputFromUser() {
 
 func main() {
 	InputFromUser()
+
 }
